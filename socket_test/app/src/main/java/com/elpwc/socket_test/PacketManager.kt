@@ -73,4 +73,10 @@ open class PacketManager {
         val v3: Int = (a[3] and 0xff.toByte()) as Int
         return v0 + v1 + v2 + v3
     }
+
+
+
+    open fun Execute(packet : Packet){
+        
+    }
 }

@@ -49,14 +49,14 @@ class MainActivity : AppCompatActivity() {
         tcpClient.Connect()
 
         udpClient = Client(textBox1.text.toString(),  textBox5.text.toString().toInt())
-        udpClient.Connect()
+        udpClient.udp_connect()
 
         Thread{
             tcpClient.Receive()
         }.start()
 
         Thread{
-            udpClient.Receive()
+            udpClient.udp_Receive()
         }.start()
 
         Thread{
@@ -82,7 +82,8 @@ class MainActivity : AppCompatActivity() {
 
 
     fun button2_onClick(view: View){
-        udpClient.Send(textBox3.text.toString().encodeToByteArray())
+        //tcpClient.Send(textBox3.text.toString().encodeToByteArray())
+        udpClient.udp_Send(textBox1.text.toString(),  textBox5.text.toString().toInt(),textBox3.text.toString().encodeToByteArray())
         textBox4.append("[U]client: " + textBox3.text.toString() + "\r\n")
     }
 
