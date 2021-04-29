@@ -76,7 +76,7 @@ class Client(host_: String, port_: Int, isudp: Boolean = false){
     }
     fun udp_Receive() {
 
-        var by = ByteArray(1024)
+        var by = ByteArray(1024*1024)
         lateinit var packet: DatagramPacket
 
         try {
@@ -112,7 +112,7 @@ class Client(host_: String, port_: Int, isudp: Boolean = false){
     var rcv_data : ByteArray? = null
 
     fun Receive(){
-        var res = ByteArray(1024)
+        var res = ByteArray(1024*1024)
         var len = 0
         try{
             Thread{

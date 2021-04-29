@@ -5,14 +5,15 @@ import java.io.ByteArrayOutputStream
 import kotlin.experimental.and
 
 
-open class PacketManager {
+object PacketManager {
     fun encode(packet: Packet) : ByteArray{
         var baos = ByteArrayOutputStream()
 
         baos.write(packet.magic_number)
         baos.write(arrayOf(packet.version).toByteArray(), 0, 1)
         baos.write(arrayOf(packet.source).toByteArray(), 0, 1)
-        baos.write(arrayOf(packet.command as Byte).toByteArray(), 0, 1)
+        baos.write(arrayOf(packet.isSbyte).toByteArray(), 0, 1)
+        baos.write(arrayOf(packet.command.id.toByte()).toByteArray(), 0, 1)
         baos.write(packet.datalen)
         baos.write(packet.data)
 
@@ -20,13 +21,14 @@ open class PacketManager {
     }
 
     fun decode(data: ByteArray) : Packet?{
-        var packet = Packet()
+        lateinit var packet : Packet
 
         var bais = ByteArrayInputStream(data)
 
 
         var version: Byte = 0
         var source: Byte = 0
+        var isSbyte : Byte = 1
         var command: Commands = Commands.no_op
         var datalen = 0
         var innerdata = byteArrayOf()
@@ -35,18 +37,26 @@ open class PacketManager {
 
         bais.read(buffer, 0, 4)
 
-        if (buffer.take(4).toByteArray()  === byteArrayOf(0, 114, 51, 4)) {
+        if (buffer.take(4).toByteArray() contentEquals byteArrayOf(0, 114, 51, 4)) {
 
-            version = bais.read() as Byte
-            when (version) {
-                1 as Byte -> {
-                    source = bais.read() as Byte
-                    command = bais.read() as Byte as Commands
+
+            version = bais.read().toByte()
+            when (version.toInt()) {
+                1 -> {
+                    source = bais.read().toByte()
+                    isSbyte = bais.read().toByte()
+                    command = Commands.fromInt(bais.read())
                     bais.read(buffer, 0, 4)
                     datalen = byteArrayToInt(buffer.take(4).toByteArray())
                     bais.read(buffer, 0, datalen)
-                    innerdata = buffer.take(datalen).toByteArray()
-                    packet = Packet(1, source,command, innerdata)
+                    if(isSbyte == 1.toByte()){
+                        innerdata = buffer.take(datalen).toByteArray()
+                    }else{
+                        innerdata = buffer.take(datalen).toByteArray()
+                        //Byte to Sbyte
+                    }
+
+                    packet = Packet(1, source,isSbyte,command, innerdata)
                 }
                 else -> {
                 }
@@ -67,10 +77,10 @@ open class PacketManager {
             i--
             j--
         }
-        val v0: Int = (a[0] and 0xff.toByte()) as Int shl 24 //&0xff将byte值无差异转成int,避免Java自动类型提升后,会保留高位的符号位
-        val v1: Int = (a[1] and 0xff.toByte()) as Int shl 16
-        val v2: Int = (a[2] and 0xff.toByte()) as Int shl 8
-        val v3: Int = (a[3] and 0xff.toByte()) as Int
+        val v0: Int = (a[0] and 0xff.toByte()).toInt() shl 24 //&0xff将byte值无差异转成int,避免Java自动类型提升后,会保留高位的符号位
+        val v1: Int = (a[1] and 0xff.toByte()).toInt() shl 16
+        val v2: Int = (a[2] and 0xff.toByte()).toInt() shl 8
+        val v3: Int = (a[3] and 0xff.toByte()).toInt()
         return v0 + v1 + v2 + v3
     }
 
